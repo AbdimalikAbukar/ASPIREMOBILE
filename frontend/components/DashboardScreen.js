@@ -13,7 +13,7 @@ const DashboardScreen = ({ navigation }) => {
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/goals", {
+        const response = await axios.get("http://localhost:3000/api/goals", {
           headers: {
             Authorization: `Bearer ${authToken}`, // Send token in the header
           },

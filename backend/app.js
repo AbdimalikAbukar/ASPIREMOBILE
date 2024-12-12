@@ -4,10 +4,13 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const methodOverride = require("method-override");
+const session = require("express-session");
+const flash = require("connect-flash");
+const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Load environment variables only once
+// Load environment variables
 dotenv.config();
 
 // Middleware
@@ -18,6 +21,21 @@ app.use(methodOverride("_method"));
 
 // Middleware to parse cookies
 app.use(cookieParser());
+
+// Enable all CORS requests (for development)
+app.use(cors());
+
+// Session Middleware (needed for flash messages)
+app.use(
+  session({
+    secret: "my-very-simple-session-secret", // Choose a secret key
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+// Flash Middleware (use after session middleware)
+app.use(flash());
 
 // Database Connection
 mongoose

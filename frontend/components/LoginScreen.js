@@ -1,7 +1,8 @@
-// screens/LoginScreen.js
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
 import { useDispatch } from "react-redux";
+import axios from "axios";
+import * as SecureStore from "expo-secure-store"; // For storing the token securely
 import { login } from "../redux/actions/authActions";
 
 const LoginScreen = ({ navigation }) => {
@@ -9,13 +10,30 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
 
-  const handleLogin = () => {
-    // Simulate login, in reality, you would authenticate here
-    const user = { email };
-    const token = "fake-jwt-token"; // Replace with actual token
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
 
-    dispatch(login(user, token)); // Dispatch login action
-    navigation.navigate("Dashboard"); // Navigate to Dashboard
+      if (response.data.token) {
+        // Store the token securely
+        await SecureStore.setItemAsync("authToken", response.data.token);
+        // Optionally save the user data as well
+        dispatch(login(response.data.user, response.data.token)); // Redux action to update user state
+        navigation.navigate("Dashboard"); // Navigate to dashboard
+      }
+    } catch (error) {
+      console.error(
+        "Login failed:",
+        error.response?.data?.message || error.message
+      );
+      alert("Login failed. Please check your credentials.");
+    }
   };
 
   return (
