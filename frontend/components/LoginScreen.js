@@ -13,19 +13,20 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        {
-          email,
-          password,
-        }
+        "http://192.168.2.207:3000/api/auth/login",
+        { email, password }
       );
 
-      if (response.data.token) {
+      console.log("Login response data:", response.data); // Log response data
+
+      if (response.data && response.data.token) {
         // Store the token securely
         await SecureStore.setItemAsync("authToken", response.data.token);
-        // Optionally save the user data as well
-        dispatch(login(response.data.user, response.data.token)); // Redux action to update user state
+        dispatch(login(response.data.user, response.data.token)); // Update Redux state with user and token
         navigation.navigate("Dashboard"); // Navigate to dashboard
+      } else {
+        console.error("Token not found in the response");
+        alert("Login failed. Token not received.");
       }
     } catch (error) {
       console.error(

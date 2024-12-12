@@ -19,7 +19,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
         <Stack.Screen name="Goal" component={GoalScreen} />
-        <Stack.Screen name="Add Goal" component={AddGoalScreen} />
+        <Stack.Screen name="AddGoal" component={AddGoalScreen} />
         <Stack.Screen
           name="Friends"
           component={FriendManagementScreen}

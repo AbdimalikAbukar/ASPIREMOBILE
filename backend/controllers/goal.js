@@ -82,4 +82,28 @@ const getSharedGoals = async (req, res) => {
   }
 };
 
+const deleteGoal = async (req, res) => {
+  try {
+    const { goalId } = req.params;
+
+    const goal = await Goal.findById(goalId);
+
+    if (!goal || goal.user.toString() !== req.user.id) {
+      return res.status(404).render("error", {
+        message: "Goal not found or unauthorized",
+        error: { status: 404 },
+      });
+    }
+
+    await Goal.findByIdAndDelete(goalId);
+    res.redirect("/api/goals");
+  } catch (err) {
+    console.error("Error deleting goal:", err);
+    res.status(500).render("error", {
+      message: "Error deleting goal",
+      error: err,
+    });
+  }
+};
+
 module.exports = { addGoal, getGoals, shareGoal, getSharedGoals };

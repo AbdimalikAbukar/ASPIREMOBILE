@@ -23,7 +23,11 @@ app.use(methodOverride("_method"));
 app.use(cookieParser());
 
 // Enable all CORS requests (for development)
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:8081",
+  })
+);
 
 // Session Middleware (needed for flash messages)
 app.use(

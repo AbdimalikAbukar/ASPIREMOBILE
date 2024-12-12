@@ -24,10 +24,7 @@ router.use(authMiddleware);
 
 // Routes
 router.get("/", getGoals); // Fetch goals for authenticated user
-router
-  .route("/add")
-  .get((req, res) => res.render("add_goal")) // Render the form
-  .post(validateGoal, addGoal); // Add a new goal
+router.post("/add", validateGoal, addGoal); // Add a new goal
 router.post("/share", shareGoal); // Share a goal
 router.get("/shared", getSharedGoals); // Fetch shared goals
 
