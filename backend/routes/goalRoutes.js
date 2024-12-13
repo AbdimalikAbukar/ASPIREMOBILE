@@ -6,10 +6,11 @@ const { check } = require("express-validator");
 // Import controllers
 const {
   getGoals,
-  renderAddGoalForm,
+  deleteGoal,
   addGoal,
   shareGoal,
   getSharedGoals,
+  getGoalById,
 } = require("../controllers/goal");
 
 // Middleware for validating form parameters
@@ -25,7 +26,9 @@ router.use(authMiddleware);
 // Routes
 router.get("/", getGoals); // Fetch goals for authenticated user
 router.post("/add", validateGoal, addGoal); // Add a new goal
-router.post("/share", shareGoal); // Share a goal
+router.post("/share/:goalId", shareGoal); // Share a goal
 router.get("/shared", getSharedGoals); // Fetch shared goals
+router.delete("/delete/:goalId", deleteGoal);
+router.get("/:goalId", getGoalById); // Fetch a goal by its ID
 
 module.exports = router;

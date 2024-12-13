@@ -43,11 +43,21 @@ const getGoals = async (req, res) => {
 // Share a goal with another user
 const shareGoal = async (req, res) => {
   try {
-    const { goalId, friendId } = req.body;
-    const goal = await Goal.findById(goalId);
+    const { goalId } = req.params; // Get goalId from URL params
+    const { friendId } = req.body; // Get friendId from request body
 
+    // Validate if friendId is provided
+    if (!friendId) {
+      return res.status(400).json({ message: "Friend ID is required" });
+    }
+
+    const goal = await Goal.findById(goalId); // Find the goal by goalId
+
+    // Check if goal exists and if the user is the owner
     if (!goal || goal.user.toString() !== req.user.id) {
-      return res.status(404).json({ message: "Goal not found" });
+      return res
+        .status(404)
+        .json({ message: "Goal not found or not authorized" });
     }
 
     // Add friend's ID to the sharedWith array if not already present
@@ -55,9 +65,11 @@ const shareGoal = async (req, res) => {
       goal.sharedWith.push(friendId);
     }
 
+    // Save the updated goal
     await goal.save();
+
     // Return the updated goal after sharing
-    res.json(goal);
+    res.json({ message: "Goal shared successfully", goal });
   } catch (err) {
     console.error("Error sharing goal:", err);
     res.status(500).json({ message: "Error sharing goal" });
@@ -89,21 +101,40 @@ const deleteGoal = async (req, res) => {
     const goal = await Goal.findById(goalId);
 
     if (!goal || goal.user.toString() !== req.user.id) {
-      return res.status(404).render("error", {
-        message: "Goal not found or unauthorized",
-        error: { status: 404 },
-      });
+      return res
+        .status(404)
+        .json({ message: "Goal not found or unauthorized" });
     }
 
     await Goal.findByIdAndDelete(goalId);
-    res.redirect("/api/goals");
+    res.status(200).json({ message: "Goal successfully deleted" });
   } catch (err) {
     console.error("Error deleting goal:", err);
-    res.status(500).render("error", {
-      message: "Error deleting goal",
-      error: err,
-    });
+    res.status(500).json({ message: "Error deleting goal", error: err });
   }
 };
 
-module.exports = { addGoal, getGoals, shareGoal, getSharedGoals };
+const getGoalById = async (req, res) => {
+  try {
+    const { goalId } = req.params; // Get the goalId from the request parameters
+    const goal = await Goal.findById(goalId); // Assuming you are using Mongoose for MongoDB
+
+    if (!goal) {
+      return res.status(404).json({ message: "Goal not found" });
+    }
+
+    res.json(goal); // Return the goal data
+  } catch (error) {
+    console.error("Error fetching goal:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = {
+  addGoal,
+  getGoals,
+  shareGoal,
+  getSharedGoals,
+  deleteGoal,
+  getGoalById,
+};

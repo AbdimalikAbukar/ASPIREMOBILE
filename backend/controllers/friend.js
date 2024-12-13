@@ -91,26 +91,66 @@ const getFriends = async (req, res) => {
       return res.status(401).send("User not authenticated");
     }
 
-    // Fetch all friend relationships involving the current user
+    // Fetch all friendships involving the current user, both pending and accepted
     const friendships = await Friend.find({
-      $or: [{ user: req.user.id }, { friend: req.user.id }],
+      $or: [
+        { user: req.user.id, status: "pending" },
+        { friend: req.user.id, status: "pending" },
+        { user: req.user.id, status: "accepted" },
+        { friend: req.user.id, status: "accepted" },
+      ],
     })
       .populate("user", "username email")
       .populate("friend", "username email");
 
-    // Separate accepted and pending requests
-    const acceptedFriends = friendships.filter(
-      (friend) => friend.status === "accepted"
+    // Separate accepted friends
+    const acceptedFriends = friendships
+      .filter((friendship) => {
+        return (
+          (friendship.status === "accepted" &&
+            friendship.user._id.toString() === req.user.id &&
+            friendship.friend._id.toString() !== req.user.id) ||
+          (friendship.status === "accepted" &&
+            friendship.friend._id.toString() === req.user.id &&
+            friendship.user._id.toString() !== req.user.id)
+        );
+      })
+      .map((friendship) => {
+        // Return the friend that is not the current user
+        if (friendship.user._id.toString() === req.user.id) {
+          return friendship.friend;
+        } else {
+          return friendship.user;
+        }
+      });
+
+    // Remove duplicate friends by mapping to their _id and then back to the friend object
+    const uniqueAcceptedFriends = Array.from(
+      new Set(acceptedFriends.map((friend) => friend._id.toString()))
+    ).map((id) =>
+      acceptedFriends.find((friend) => friend._id.toString() === id)
     );
 
-    const pendingFriends = friendships.filter(
+    // Separate pending received friend requests (where current user is the receiver)
+    const pendingReceivedRequests = friendships.filter(
       (friend) =>
         friend.status === "pending" &&
-        friend.friend &&
-        friend.friend.toString() === req.user.id
+        friend.friend._id.toString() === req.user.id
     );
 
-    res.json({ acceptedFriends, pendingFriends });
+    // Separate sent friend requests (where current user is the sender)
+    const sentRequests = friendships.filter(
+      (friend) =>
+        friend.status === "pending" &&
+        friend.user._id.toString() === req.user.id
+    );
+
+    // Send the data as a JSON response
+    res.json({
+      acceptedFriends: uniqueAcceptedFriends,
+      pendingReceivedRequests,
+      sentRequests,
+    });
   } catch (err) {
     console.error("Error fetching friends list:", err);
     res.status(500).send("Error fetching friends list");

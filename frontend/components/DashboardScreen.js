@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, FlatList } from "react-native";
+import { View, Text, Button, FlatList, StyleSheet } from "react-native";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store"; // Ensure SecureStore is imported
 
@@ -54,16 +54,20 @@ const DashboardScreen = ({ navigation }) => {
   }
 
   return (
-    <View>
-      <Text>Dashboard</Text>
+    <View style={styles.container}>
+      {/* Welcome Banner */}
+      <View style={styles.banner}>
+        <Text style={styles.bannerText}>Welcome to Aspire</Text>
+      </View>
+
+      {/* Goals List */}
       <FlatList
         data={goals}
         keyExtractor={(item) => item._id.toString()} // Use _id for the key
         renderItem={({ item }) => (
-          <View>
-            <Text>{item.title}</Text>
-            <Text>{item.description}</Text>
-            <Text>
+          <View style={styles.goalContainer}>
+            <Text style={styles.goalTitle}>{item.title}</Text>
+            <Text style={styles.goalDeadline}>
               Deadline: {new Date(item.deadline).toLocaleDateString()}
             </Text>
             <Button
@@ -73,9 +77,47 @@ const DashboardScreen = ({ navigation }) => {
           </View>
         )}
       />
-      <Button title="Add Goal" onPress={() => navigation.navigate("AddGoal")} />
+
+      {/* Bottom Navigation Button */}
+      <Button
+        title="View All Goals"
+        onPress={() => navigation.navigate("Goals")}
+      />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  banner: {
+    backgroundColor: "#4CAF50", // You can customize the banner color
+    padding: 20,
+    marginBottom: 20,
+    alignItems: "center",
+    borderRadius: 5,
+  },
+  bannerText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
+  },
+  goalContainer: {
+    marginBottom: 15,
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  goalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  goalDeadline: {
+    fontSize: 14,
+    color: "#555",
+  },
+});
 
 export default DashboardScreen;

@@ -4,11 +4,9 @@ const {
   acceptFriendReq,
   getFriends,
   removeFriends,
-  renderAddFriendForm,
-  renderDeleteFriendForm,
-  renderConfirmRemoveFriend,
 } = require("../controllers/friend");
 const authMiddleware = require("../authMiddleware");
+const User = require("../models/user");
 
 const router = express.Router();
 
@@ -29,15 +27,17 @@ router.get("/", getFriends);
 // Remove a friend
 router.delete("/:friendId", removeFriends);
 
-/** ----------- Friend Form Rendering Routes ----------- **/
+// Route to get all users
+router.get("/users", async (req, res) => {
+  try {
+    // You can modify this to fetch users with specific filters, like excluding the current user
+    const users = await User.find({}, "username email"); // Adjust fields as needed
 
-// Render the "Add Friend" form
-router.get("/add", renderAddFriendForm);
-
-// Render the "Delete Friend" form
-router.get("/delete", renderDeleteFriendForm);
-
-// Render the "Confirm Remove Friend" form
-router.get("/confirm_remove/:friendId", renderConfirmRemoveFriend);
+    res.json({ users });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error while fetching users" });
+  }
+});
 
 module.exports = router;

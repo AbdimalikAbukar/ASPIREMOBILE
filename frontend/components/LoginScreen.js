@@ -23,7 +23,7 @@ const LoginScreen = ({ navigation }) => {
         // Store the token securely
         await SecureStore.setItemAsync("authToken", response.data.token);
         dispatch(login(response.data.user, response.data.token)); // Update Redux state with user and token
-        navigation.navigate("Dashboard"); // Navigate to dashboard
+        navigation.replace("Main"); // Navigate to dashboard
       } else {
         console.error("Token not found in the response");
         alert("Login failed. Token not received.");
