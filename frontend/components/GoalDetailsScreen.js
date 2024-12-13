@@ -136,17 +136,17 @@ const GoalDetailsScreen = () => {
             <Text style={styles.modalTitle}>Select a Friend to Share With</Text>
 
             <FlatList
-              data={acceptedFriends}
-              keyExtractor={(item) => item.friend._id.toString()}
+              data={acceptedFriends || []}
+              keyExtractor={(item) => item._id.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.friendItem}
                   onPress={() => {
-                    setFriendId(item.friend._id);
+                    setFriendId(item._id);
                     setModalVisible(false);
                   }}
                 >
-                  <Text style={styles.friendName}>{item.friend.username}</Text>
+                  <Text style={styles.friendName}>{item.username}</Text>
                 </TouchableOpacity>
               )}
             />

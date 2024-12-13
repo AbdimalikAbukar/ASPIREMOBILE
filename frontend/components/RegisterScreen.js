@@ -26,15 +26,14 @@ function RegisterScreen() {
     try {
       const response = await axios.post(
         "http://192.168.2.207:3000/api/auth/register",
-        {
-          email,
-          username,
-          password,
-        }
+        { email, username, password }
       );
+      console.log("Registration Response:", response.data);
 
-      if (response.data.message === "User registered successfully") {
+      if (response.data.message === "User registered!") {
         navigation.navigate("Login");
+      } else {
+        setError("Unexpected response, please try again.");
       }
     } catch (err) {
       console.error("Registration error:", err);
@@ -42,8 +41,6 @@ function RegisterScreen() {
         err.response?.data?.message ||
           "Registration failed. Please try again later."
       );
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -119,7 +119,7 @@ const DashboardScreen = ({ navigation }) => {
                 <Button
                   title="Go to Goal"
                   onPress={() =>
-                    navigation.navigate("Goal", { goalId: item._id })
+                    navigation.navigate("GoalDetails", { goalId: item._id })
                   }
                 />
               </View>
