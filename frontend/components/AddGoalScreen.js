@@ -1,76 +1,105 @@
-import React, { useState } from "react";
-import { View, TextInput, Button, Text, StyleSheet } from "react-native";
-import * as SecureStore from "expo-secure-store";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  Alert,
+  Modal,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
 import axios from "axios";
+import * as SecureStore from "expo-secure-store";
+import { useNavigation } from "@react-navigation/native";
 
-const AddGoalScreen = ({ navigation }) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [deadline, setDeadline] = useState("");
+const GoalScreen = ({ route }) => {
+  const { goalId } = route.params || {}; // Retrieve goalId from navigation params, if available
+  const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false); // Modal visibility state for delete confirmation
+  const [selectedGoalId, setSelectedGoalId] = useState(null); // Store the selected goal ID for deletion
+  const navigation = useNavigation();
 
-  const handleAddGoal = async () => {
-    if (!title || !description || !deadline) {
-      setError("Please fill in all fields.");
-      return;
-    }
+  // Fetch goals when the component is mounted
+  useEffect(() => {
+    const fetchGoals = async () => {
+      try {
+        const authToken = await SecureStore.getItemAsync("authToken");
 
-    setLoading(true);
-    setError(null);
+        if (!authToken) {
+          Alert.alert("Error", "No auth token found. Please log in.");
+          return;
+        }
 
+        // Fetch the list of goals
+        const response = await axios.get(
+          "http://192.168.2.207:3000/api/goals",
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+
+        setGoals(response.data);
+      } catch (error) {
+        console.error("Error fetching goals:", error);
+        Alert.alert("Error", "Failed to load goals.");
+      }
+    };
+
+    fetchGoals();
+  }, []);
+
+  // Handle deleting the goal
+  const handleDelete = async () => {
     try {
+      setLoading(true);
       const authToken = await SecureStore.getItemAsync("authToken");
 
       if (!authToken) {
-        setError("No auth token found. Please log in.");
-        setLoading(false);
+        Alert.alert("Error", "No auth token found. Please log in.");
         return;
       }
 
-      const response = await axios.post(
-        "http://192.168.2.207:3000/api/goals/add",
-        {
-          title,
-          description,
-          deadline,
-        },
+      const response = await axios.delete(
+        `http://192.168.2.207:3000/api/goals/delete/${selectedGoalId}`,
         {
           headers: {
-            Authorization: `Bearer ${authToken}`, // Send token in the header
+            Authorization: `Bearer ${authToken}`,
           },
         }
       );
 
-      if (response.data) {
-        navigation.goBack(); // Navigate back to the previous screen
+      if (response.status === 200) {
+        Alert.alert("Success", "Goal deleted successfully.");
+        setGoals(goals.filter((goal) => goal._id !== selectedGoalId)); // Remove deleted goal from the list
       }
-    } catch (err) {
-      console.error("Error adding goal:", err);
-      setError("Failed to add goal");
+    } catch (error) {
+      console.error("Error deleting goal:", error);
+      Alert.alert("Error", "Failed to delete goal.");
     } finally {
       setLoading(false);
+      setModalVisible(false); // Close the modal after deleting
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Add Goal</Text>
-      {error && <Text style={styles.errorText}>{error}</Text>}
+    <View>
+      <Text>Add Goal</Text>
+      {error && <Text>{error}</Text>}
       <TextInput
-        style={styles.input}
         placeholder="Goal Title"
         value={title}
         onChangeText={setTitle}
       />
       <TextInput
-        style={styles.input}
         placeholder="Description"
         value={description}
         onChangeText={setDescription}
       />
       <TextInput
-        style={styles.input}
         placeholder="Deadline (YYYY-MM-DD)"
         value={deadline}
         onChangeText={setDeadline}
@@ -111,4 +140,53 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddGoalScreen;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  header: {
+    fontSize: 32,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  addButton: {
+    marginBottom: 20,
+  },
+  goalItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  goalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  goalDeadline: {
+    marginVertical: 8,
+    color: "gray",
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+});
+
+export default GoalScreen;
