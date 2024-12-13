@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import { View, TextInput, Button, Text, StyleSheet } from "react-native";
+import { View, TextInput, Button, Text, StyleSheet, Alert } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import axios from "axios";
+import { useNavigation } from "@react-navigation/native";
 
-const AddGoalScreen = ({ navigation }) => {
+const AddGoalScreen = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
 
   const handleAddGoal = async () => {
     if (!title || !description || !deadline) {
@@ -16,35 +18,25 @@ const AddGoalScreen = ({ navigation }) => {
       return;
     }
 
-    setLoading(true);
-    setError(null);
-
     try {
+      setLoading(true);
       const authToken = await SecureStore.getItemAsync("authToken");
 
       if (!authToken) {
-        setError("No auth token found. Please log in.");
-        setLoading(false);
+        Alert.alert("Error", "No auth token found. Please log in.");
         return;
       }
 
-      const response = await axios.post(
+      await axios.post(
         "http://192.168.2.207:3000/api/goals/add",
+        { title, description, deadline },
         {
-          title,
-          description,
-          deadline,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${authToken}`, // Send token in the header
-          },
+          headers: { Authorization: `Bearer ${authToken}` },
         }
       );
 
-      if (response.data) {
-        navigation.goBack(); // Navigate back to the previous screen
-      }
+      Alert.alert("Success", "Goal added successfully.");
+      navigation.goBack(); // Navigate back to the previous screen after adding
     } catch (err) {
       console.error("Error adding goal:", err);
       setError("Failed to add goal");
@@ -55,25 +47,25 @@ const AddGoalScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Add Goal</Text>
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      <Text>Add Goal</Text>
+      {error && <Text>{error}</Text>}
       <TextInput
-        style={styles.input}
         placeholder="Goal Title"
         value={title}
         onChangeText={setTitle}
+        style={styles.input}
       />
       <TextInput
-        style={styles.input}
         placeholder="Description"
         value={description}
         onChangeText={setDescription}
+        style={styles.input}
       />
       <TextInput
-        style={styles.input}
         placeholder="Deadline (YYYY-MM-DD)"
         value={deadline}
         onChangeText={setDeadline}
+        style={styles.input}
       />
       <Button
         title={loading ? "Saving..." : "Save Goal"}
@@ -88,26 +80,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F0F8FF", // Zen-like background color (light blue)
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  errorText: {
-    color: "red",
-    textAlign: "center",
-    marginBottom: 10,
   },
   input: {
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 8,
-    borderRadius: 5,
+    borderBottomWidth: 1,
+    marginBottom: 16,
+    padding: 8,
   },
 });
 
