@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Button, FlatList, StyleSheet } from "react-native";
 import axios from "axios";
-import * as SecureStore from "expo-secure-store"; // Ensure SecureStore is imported
+import * as SecureStore from "expo-secure-store";
 
 const DashboardScreen = ({ navigation }) => {
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [quote, setQuote] = useState(""); // State to store the quote
-  const [author, setAuthor] = useState(""); // State to store the author
+  const [quote, setQuote] = useState("");
+  const [author, setAuthor] = useState("");
 
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        // Retrieve token from SecureStore
         const authToken = await SecureStore.getItemAsync("authToken");
 
         if (!authToken) {
@@ -26,13 +25,13 @@ const DashboardScreen = ({ navigation }) => {
           "http://192.168.2.207:3000/api/goals",
           {
             headers: {
-              Authorization: `Bearer ${authToken}`, // Send token in the header
+              Authorization: `Bearer ${authToken}`,
             },
           }
         );
 
         if (response.data && response.data.length > 0) {
-          setGoals(response.data); // Set the fetched goals
+          setGoals(response.data);
         } else {
           setError("No goals found.");
         }
@@ -44,10 +43,9 @@ const DashboardScreen = ({ navigation }) => {
       }
     };
 
-    // Fetch the quote data
     const fetchQuote = async () => {
       try {
-        const response = await axios.get("http://192.168.2.207:3000/"); // Change to your API endpoint that returns the quote
+        const response = await axios.get("http://192.168.2.207:3000/"); // Change to your API endpoint for the quote
         setQuote(response.data.quote);
         setAuthor(response.data.author);
       } catch (err) {
@@ -75,38 +73,39 @@ const DashboardScreen = ({ navigation }) => {
     const deadlineDate = new Date(goal.deadline);
     const timeDiff = deadlineDate - currentDate;
     const daysRemaining = timeDiff / (1000 * 3600 * 24);
-    return daysRemaining >= 0 && daysRemaining <= 7; // Goal deadline is within the next 7 days
+
+    console.log("Current Date:", currentDate);
+    console.log("Goal Deadline:", deadlineDate);
+    console.log("Days Remaining:", daysRemaining);
+
+    // Only include goals with a deadline within the next 7 days
+    return daysRemaining >= 0 && daysRemaining <= 7;
   });
 
   // Get today's date
   const today = new Date();
-  const todayDate = today.toLocaleDateString(); // Format the current date
+  const todayDate = today.toLocaleDateString();
 
   return (
     <View style={styles.container}>
-      {/* Welcome Banner */}
       <View style={styles.banner}>
         <Text style={styles.bannerText}>Welcome to Aspire</Text>
       </View>
 
-      {/* Display Today's Date */}
       <Text style={styles.dateText}>Today's Date: {todayDate}</Text>
 
-      {/* Display Quote */}
       <View style={styles.quoteContainer}>
         <Text style={styles.quoteText}>"{quote}"</Text>
         {author && <Text style={styles.authorText}>- {author}</Text>}
       </View>
 
-      {/* Upcoming Deadlines Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Upcoming Deadlines</Text>
 
-        {/* Display goals with upcoming deadlines */}
         {upcomingGoals.length > 0 ? (
           <FlatList
             data={upcomingGoals}
-            keyExtractor={(item) => item._id.toString()} // Use _id for the key
+            keyExtractor={(item) => item._id.toString()}
             renderItem={({ item }) => (
               <View style={styles.goalContainer}>
                 <Text style={styles.goalTitle}>{item.title}</Text>
@@ -127,7 +126,6 @@ const DashboardScreen = ({ navigation }) => {
         )}
       </View>
 
-      {/* Bottom Navigation Button */}
       <Button
         title="View All Goals"
         onPress={() => navigation.navigate("Goals")}
@@ -142,7 +140,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   banner: {
-    backgroundColor: "#4CAF50", // You can customize the banner color
+    backgroundColor: "#4CAF50",
     padding: 20,
     marginBottom: 20,
     alignItems: "center",
