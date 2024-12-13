@@ -2,14 +2,12 @@ const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../authMiddleware");
 const { check } = require("express-validator");
-
-// Import controllers
 const {
   getGoals,
   deleteGoal,
   addGoal,
   shareGoal,
-  getSharedGoals,
+
   getGoalById,
 } = require("../controllers/goal");
 
@@ -27,7 +25,7 @@ router.use(authMiddleware);
 router.get("/", getGoals); // Fetch goals for authenticated user
 router.post("/add", validateGoal, addGoal); // Add a new goal
 router.post("/share/:goalId", shareGoal); // Share a goal
-router.get("/shared", getSharedGoals); // Fetch shared goals
+
 router.delete("/delete/:goalId", deleteGoal);
 router.get("/:goalId", getGoalById); // Fetch a goal by its ID
 

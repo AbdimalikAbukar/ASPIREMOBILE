@@ -10,10 +10,7 @@ const User = require("../models/user");
 
 const router = express.Router();
 
-// Apply auth middleware to all routes
 router.use(authMiddleware);
-
-/** ----------- Friend Management Routes ----------- **/
 
 // Send a friend request
 router.post("/request", sendFriendReq);
@@ -30,8 +27,7 @@ router.delete("/:friendId", removeFriends);
 // Route to get all users
 router.get("/users", async (req, res) => {
   try {
-    // You can modify this to fetch users with specific filters, like excluding the current user
-    const users = await User.find({}, "username email"); // Adjust fields as needed
+    const users = await User.find({}, "username email");
 
     res.json({ users });
   } catch (err) {

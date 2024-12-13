@@ -10,35 +10,28 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Load environment variables
 dotenv.config();
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-// Use method-override to support "_method" field in forms
-app.use(methodOverride("_method"));
 
-// Middleware to parse cookies
 app.use(cookieParser());
 
-// Enable all CORS requests (for development)
 app.use(
   cors({
     origin: "http://localhost:8081",
   })
 );
 
-// Session Middleware (needed for flash messages)
 app.use(
   session({
-    secret: "my-very-simple-session-secret", // Choose a secret key
+    secret: "my-very-simple-session-secret",
     resave: false,
     saveUninitialized: true,
   })
 );
 
-// Flash Middleware (use after session middleware)
 app.use(flash());
 
 // Database Connection
@@ -50,12 +43,8 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((error) => {
     console.error("Error connecting to MongoDB:", error);
-    process.exit(1); // Exit process with failure
+    process.exit(1);
   });
-
-// View engine setup
-app.set("views", "./frontend/views"); // Path to pug templates
-app.set("view engine", "pug");
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));

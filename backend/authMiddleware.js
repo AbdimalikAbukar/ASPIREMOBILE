@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-  // Get token from Authorization header
   const token = req.header("Authorization")?.replace("Bearer ", "");
 
   if (!token) {
@@ -9,9 +8,9 @@ const authMiddleware = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
-    req.user = decoded; // Attach decoded user data to the request object
-    next(); // Proceed to the next middleware/route handler
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
   } catch (error) {
     res.status(403).json({ error: "Invalid token" });
   }
