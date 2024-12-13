@@ -8,6 +8,7 @@ const category = "inspirational";
 
 const apiUrl = `https://api.api-ninjas.com/v1/quotes?category=${category}`;
 
+// Assuming this route is in your Express backend
 router.get("/", async (req, res) => {
   try {
     const response = await axios.get(apiUrl, {
@@ -24,22 +25,19 @@ router.get("/", async (req, res) => {
 
     console.log("Rendered Data:", { quote, author });
 
-    // Render the index template with the fetched data
-    res.render("index", {
-      title: "Aspire",
+    // Send the quote and author as part of the response JSON
+    res.json({
       quote,
       author,
     });
   } catch (error) {
     console.error("Error fetching quote:", error.message);
 
-    // Render the index template with an error message
-    res.render("index", {
-      title: "Aspire",
+    // Return a fallback quote in case of an error
+    res.json({
       quote: "An error occurred while fetching the quote.",
       author: "",
     });
   }
 });
-
 module.exports = router;

@@ -7,6 +7,8 @@ const DashboardScreen = ({ navigation }) => {
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [quote, setQuote] = useState(""); // State to store the quote
+  const [author, setAuthor] = useState(""); // State to store the author
 
   useEffect(() => {
     const fetchGoals = async () => {
@@ -42,7 +44,21 @@ const DashboardScreen = ({ navigation }) => {
       }
     };
 
+    // Fetch the quote data
+    const fetchQuote = async () => {
+      try {
+        const response = await axios.get("http://192.168.2.207:3000/"); // Change to your API endpoint that returns the quote
+        setQuote(response.data.quote);
+        setAuthor(response.data.author);
+      } catch (err) {
+        console.error("Error fetching quote:", err);
+        setQuote("Failed to load quote.");
+        setAuthor("");
+      }
+    };
+
     fetchGoals();
+    fetchQuote();
   }, []);
 
   if (loading) {
@@ -53,6 +69,19 @@ const DashboardScreen = ({ navigation }) => {
     return <Text>{error}</Text>;
   }
 
+  // Filter goals that have a deadline within a week
+  const upcomingGoals = goals.filter((goal) => {
+    const currentDate = new Date();
+    const deadlineDate = new Date(goal.deadline);
+    const timeDiff = deadlineDate - currentDate;
+    const daysRemaining = timeDiff / (1000 * 3600 * 24);
+    return daysRemaining >= 0 && daysRemaining <= 7; // Goal deadline is within the next 7 days
+  });
+
+  // Get today's date
+  const today = new Date();
+  const todayDate = today.toLocaleDateString(); // Format the current date
+
   return (
     <View style={styles.container}>
       {/* Welcome Banner */}
@@ -60,23 +89,43 @@ const DashboardScreen = ({ navigation }) => {
         <Text style={styles.bannerText}>Welcome to Aspire</Text>
       </View>
 
-      {/* Goals List */}
-      <FlatList
-        data={goals}
-        keyExtractor={(item) => item._id.toString()} // Use _id for the key
-        renderItem={({ item }) => (
-          <View style={styles.goalContainer}>
-            <Text style={styles.goalTitle}>{item.title}</Text>
-            <Text style={styles.goalDeadline}>
-              Deadline: {new Date(item.deadline).toLocaleDateString()}
-            </Text>
-            <Button
-              title="Go to Goal"
-              onPress={() => navigation.navigate("Goal", { goalId: item._id })}
-            />
-          </View>
+      {/* Display Today's Date */}
+      <Text style={styles.dateText}>Today's Date: {todayDate}</Text>
+
+      {/* Display Quote */}
+      <View style={styles.quoteContainer}>
+        <Text style={styles.quoteText}>"{quote}"</Text>
+        {author && <Text style={styles.authorText}>- {author}</Text>}
+      </View>
+
+      {/* Upcoming Deadlines Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Upcoming Deadlines</Text>
+
+        {/* Display goals with upcoming deadlines */}
+        {upcomingGoals.length > 0 ? (
+          <FlatList
+            data={upcomingGoals}
+            keyExtractor={(item) => item._id.toString()} // Use _id for the key
+            renderItem={({ item }) => (
+              <View style={styles.goalContainer}>
+                <Text style={styles.goalTitle}>{item.title}</Text>
+                <Text style={styles.goalDeadline}>
+                  Deadline: {new Date(item.deadline).toLocaleDateString()}
+                </Text>
+                <Button
+                  title="Go to Goal"
+                  onPress={() =>
+                    navigation.navigate("Goal", { goalId: item._id })
+                  }
+                />
+              </View>
+            )}
+          />
+        ) : (
+          <Text>No goals with upcoming deadlines.</Text>
         )}
-      />
+      </View>
 
       {/* Bottom Navigation Button */}
       <Button
@@ -103,6 +152,35 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "white",
+  },
+  dateText: {
+    fontSize: 16,
+    color: "#555",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  quoteContainer: {
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  quoteText: {
+    fontSize: 18,
+    fontStyle: "italic",
+    textAlign: "center",
+  },
+  authorText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#555",
+  },
+  section: {
+    marginTop: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
   goalContainer: {
     marginBottom: 15,

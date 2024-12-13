@@ -54,6 +54,16 @@ const LoginScreen = ({ navigation }) => {
         onChangeText={setPassword}
       />
       <Button title="Login" onPress={handleLogin} />
+
+      <Text style={styles.registerPrompt}>
+        Don't have an account?{" "}
+        <Text
+          style={styles.registerLink}
+          onPress={() => navigation.navigate("Register")}
+        >
+          Register here
+        </Text>
+      </Text>
     </View>
   );
 };
@@ -75,6 +85,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 12,
     padding: 8,
+  },
+  registerPrompt: {
+    marginTop: 20,
+    textAlign: "center",
+  },
+  registerLink: {
+    color: "#007bff",
+    textDecorationLine: "underline",
   },
 });
 
