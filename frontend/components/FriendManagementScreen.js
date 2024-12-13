@@ -3,12 +3,12 @@ import {
   View,
   Text,
   Button,
-  FlatList,
   StyleSheet,
   Alert,
   TextInput,
   Modal,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
@@ -44,13 +44,11 @@ const FriendManagementScreen = () => {
         }
       );
 
-      // Debugging: log the response data
       console.log("Friends response data:", response.data);
 
       const { acceptedFriends, pendingReceivedRequests, sentRequests } =
         response.data;
 
-      // Handle nested structure for accepted friends
       setFriends(acceptedFriends || []);
       setPendingRequests(pendingReceivedRequests || []);
       setSentRequests(sentRequests || []);
@@ -70,7 +68,7 @@ const FriendManagementScreen = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       Alert.alert("Success", response.data.message);
-      setModalVisible(false); // Close modal after adding a friend
+      setModalVisible(false);
       getFriends();
     } catch (err) {
       setError(err.response?.data?.message || "Error sending friend request");
@@ -155,7 +153,6 @@ const FriendManagementScreen = () => {
         <Text style={styles.addButtonText}>Add Friend</Text>
       </TouchableOpacity>
 
-      {/* Modal for Searching Users */}
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -166,24 +163,24 @@ const FriendManagementScreen = () => {
               value={searchQuery}
               onChangeText={filterUsers}
             />
-            {/* Replaced ScrollView with FlatList */}
-            <FlatList
-              data={filteredUsers}
-              renderItem={({ item }) => (
-                <View style={styles.friendItem}>
-                  <Text>
-                    {item.username} ({item.email})
-                  </Text>
-                  <Button
-                    title="Add"
-                    onPress={() => sendFriendRequest(item._id)}
-                    color="blue"
-                  />
-                </View>
+            <ScrollView style={styles.userListContainer}>
+              {filteredUsers.length === 0 ? (
+                <Text>No users found.</Text>
+              ) : (
+                filteredUsers.map((user) => (
+                  <View key={user._id} style={styles.friendItem}>
+                    <Text>
+                      {user.username} ({user.email})
+                    </Text>
+                    <Button
+                      title="Add"
+                      onPress={() => sendFriendRequest(user._id)}
+                      color="blue"
+                    />
+                  </View>
+                ))
               )}
-              keyExtractor={(item) => item._id}
-              ListEmptyComponent={<Text>No users found.</Text>}
-            />
+            </ScrollView>
             <Button
               title="Close"
               onPress={() => setModalVisible(false)}
@@ -193,66 +190,54 @@ const FriendManagementScreen = () => {
         </View>
       </Modal>
 
-      {/* Friends List */}
-      <View style={styles.section}>
+      <ScrollView style={styles.section}>
         <Text style={styles.sectionTitle}>Friends List</Text>
-        <FlatList
-          data={friends}
-          renderItem={({ item }) => (
-            <View style={styles.friendItem}>
+        {friends.length === 0 ? (
+          <Text>No friends yet.</Text>
+        ) : (
+          friends.map((friend) => (
+            <View key={friend._id} style={styles.friendItem}>
               <Text>
-                {item.username} ({item.email})
+                {friend.username} ({friend.email})
               </Text>
               <Button
                 title="Remove"
-                onPress={() => removeFriend(item._id)}
+                onPress={() => removeFriend(friend._id)}
                 color="red"
               />
             </View>
-          )}
-          keyExtractor={(item) => item._id}
-          ListEmptyComponent={<Text>No friends yet.</Text>}
-        />
-      </View>
+          ))
+        )}
 
-      {/* Pending Requests */}
-      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Pending Friend Requests</Text>
-        <FlatList
-          data={pendingRequests}
-          renderItem={({ item }) => (
-            <View style={styles.friendItem}>
+        {pendingRequests.length === 0 ? (
+          <Text>No pending requests.</Text>
+        ) : (
+          pendingRequests.map((request) => (
+            <View key={request._id} style={styles.friendItem}>
               <Text>
-                {item.username} ({item.email})
+                {request.user.username} ({request.user.email})
               </Text>
               <Button
                 title="Accept"
-                onPress={() => acceptFriendRequest(item._id)}
+                onPress={() => acceptFriendRequest(request._id)}
                 color="green"
               />
             </View>
-          )}
-          keyExtractor={(item) => item._id}
-          ListEmptyComponent={<Text>No pending requests.</Text>}
-        />
-      </View>
+          ))
+        )}
 
-      {/* Sent Friend Requests */}
-      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Sent Friend Requests</Text>
-        <FlatList
-          data={sentRequests}
-          renderItem={({ item }) => (
-            <View style={styles.friendItem}>
-              <Text>
-                {item.friend?.username ? item.friend.username : "No username"}{" "}
-              </Text>
+        {sentRequests.length === 0 ? (
+          <Text>No sent requests.</Text>
+        ) : (
+          sentRequests.map((request) => (
+            <View key={request._id} style={styles.friendItem}>
+              <Text>{request.friend?.username || "No username"}</Text>
             </View>
-          )}
-          keyExtractor={(item) => item._id}
-          ListEmptyComponent={<Text>No sent requests.</Text>}
-        />
-      </View>
+          ))
+        )}
+      </ScrollView>
     </View>
   );
 };
@@ -261,7 +246,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#F0F8FF",
   },
   title: {
     fontSize: 24,
@@ -295,7 +280,7 @@ const styles = StyleSheet.create({
     padding: 20,
     margin: 20,
     borderRadius: 10,
-    maxHeight: "80%", // Limit modal height
+    maxHeight: "80%",
   },
   modalTitle: {
     fontSize: 20,
@@ -303,17 +288,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   input: {
+    height: 40,
+    borderColor: "#ccc",
     borderWidth: 1,
-    borderColor: "#ddd",
-    padding: 10,
-    marginBottom: 10,
     borderRadius: 5,
+    paddingLeft: 10,
+    marginBottom: 10,
   },
   friendItem: {
-    marginVertical: 10,
+    marginBottom: 10,
     padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    backgroundColor: "#f9f9f9",
   },
   section: {
     marginTop: 20,
@@ -322,6 +310,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
+  },
+  userListContainer: {
+    maxHeight: "60%",
   },
 });
 

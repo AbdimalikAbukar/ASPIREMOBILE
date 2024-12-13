@@ -1,4 +1,3 @@
-// reducers/friendReducer.js
 const initialState = {
   friends: [],
 };

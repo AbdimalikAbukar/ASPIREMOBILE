@@ -11,14 +11,12 @@ function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 
-  // Password validation
   const validatePassword = () => password.length >= 8;
 
   const handleRegister = async () => {
     setError("");
     setLoading(true);
 
-    // Validate password
     if (!validatePassword()) {
       setLoading(false);
       setError("Password must be at least 8 characters long.");
@@ -97,7 +95,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#F0F8FF",
   },
   header: {
     fontSize: 24,

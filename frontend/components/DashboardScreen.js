@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, FlatList, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Button,
+  FlatList,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
@@ -45,7 +52,7 @@ const DashboardScreen = ({ navigation }) => {
 
     const fetchQuote = async () => {
       try {
-        const response = await axios.get("http://192.168.2.207:3000/"); // Change to your API endpoint for the quote
+        const response = await axios.get("http://192.168.2.207:3000/");
         setQuote(response.data.quote);
         setAuthor(response.data.author);
       } catch (err) {
@@ -67,7 +74,6 @@ const DashboardScreen = ({ navigation }) => {
     return <Text>{error}</Text>;
   }
 
-  // Filter goals that have a deadline within a week
   const upcomingGoals = goals.filter((goal) => {
     const currentDate = new Date();
     const deadlineDate = new Date(goal.deadline);
@@ -78,16 +84,14 @@ const DashboardScreen = ({ navigation }) => {
     console.log("Goal Deadline:", deadlineDate);
     console.log("Days Remaining:", daysRemaining);
 
-    // Only include goals with a deadline within the next 7 days
     return daysRemaining >= 0 && daysRemaining <= 7;
   });
 
-  // Get today's date
   const today = new Date();
   const todayDate = today.toLocaleDateString();
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.banner}>
         <Text style={styles.bannerText}>Welcome to Aspire</Text>
       </View>
@@ -130,7 +134,7 @@ const DashboardScreen = ({ navigation }) => {
         title="View All Goals"
         onPress={() => navigation.navigate("Goals")}
       />
-    </View>
+    </ScrollView>
   );
 };
 
@@ -138,6 +142,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: "#F0F8FF",
   },
   banner: {
     backgroundColor: "#4CAF50",

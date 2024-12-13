@@ -1,4 +1,3 @@
-// reducers/goalReducer.js
 const initialState = {
   goals: [],
 };

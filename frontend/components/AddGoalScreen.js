@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TextInput, Button, Text } from "react-native";
+import { View, TextInput, Button, Text, StyleSheet } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import axios from "axios";
 
@@ -54,20 +54,23 @@ const AddGoalScreen = ({ navigation }) => {
   };
 
   return (
-    <View>
-      <Text>Add Goal</Text>
-      {error && <Text>{error}</Text>}
+    <View style={styles.container}>
+      <Text style={styles.header}>Add Goal</Text>
+      {error && <Text style={styles.errorText}>{error}</Text>}
       <TextInput
+        style={styles.input}
         placeholder="Goal Title"
         value={title}
         onChangeText={setTitle}
       />
       <TextInput
+        style={styles.input}
         placeholder="Description"
         value={description}
         onChangeText={setDescription}
       />
       <TextInput
+        style={styles.input}
         placeholder="Deadline (YYYY-MM-DD)"
         value={deadline}
         onChangeText={setDeadline}
@@ -80,5 +83,32 @@ const AddGoalScreen = ({ navigation }) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#F0F8FF", // Zen-like background color (light blue)
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingLeft: 8,
+    borderRadius: 5,
+  },
+});
 
 export default AddGoalScreen;

@@ -1,4 +1,3 @@
-// actions/friendActions.js
 export const addFriend = (friend) => ({
   type: "ADD_FRIEND",
   payload: friend,

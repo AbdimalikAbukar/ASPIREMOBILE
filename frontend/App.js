@@ -1,6 +1,5 @@
-// App.js
 import React from "react";
-import { StoreProvider } from "./redux/store"; // The Redux Store Provider
+import { StoreProvider } from "./redux/store";
 import AppNavigator from "./AppNavigator";
 
 export default function App() {

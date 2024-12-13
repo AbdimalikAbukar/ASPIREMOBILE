@@ -1,7 +1,6 @@
 import { createStore } from "redux";
-import { Provider } from "react-redux"; // Import Provider from react-redux
+import { Provider } from "react-redux";
 
-// A simple reducer
 const initialState = {
   user: null,
 };
@@ -15,12 +14,10 @@ function rootReducer(state = initialState, action) {
   }
 }
 
-// Create a Redux store
 const store = createStore(rootReducer);
 
-// StoreProvider component that provides the store to the app
 const StoreProvider = ({ children }) => {
   return <Provider store={store}>{children}</Provider>;
 };
 
-export { store, StoreProvider }; // Export both store and StoreProvider
+export { store, StoreProvider };

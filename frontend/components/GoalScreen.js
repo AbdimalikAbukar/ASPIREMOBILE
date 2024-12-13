@@ -14,14 +14,13 @@ import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native";
 
 const GoalScreen = ({ route }) => {
-  const { goalId } = route.params || {}; // Retrieve goalId from navigation params, if available
+  const { goalId } = route.params || {};
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false); // Modal visibility state for delete confirmation
-  const [selectedGoalId, setSelectedGoalId] = useState(null); // Store the selected goal ID for deletion
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedGoalId, setSelectedGoalId] = useState(null);
   const navigation = useNavigation();
 
-  // Fetch goals when the component is mounted
   useEffect(() => {
     const fetchGoals = async () => {
       try {
@@ -32,7 +31,6 @@ const GoalScreen = ({ route }) => {
           return;
         }
 
-        // Fetch the list of goals
         const response = await axios.get(
           "http://192.168.2.207:3000/api/goals",
           {
@@ -52,7 +50,6 @@ const GoalScreen = ({ route }) => {
     fetchGoals();
   }, []);
 
-  // Handle deleting the goal
   const handleDelete = async () => {
     try {
       setLoading(true);
@@ -74,14 +71,14 @@ const GoalScreen = ({ route }) => {
 
       if (response.status === 200) {
         Alert.alert("Success", "Goal deleted successfully.");
-        setGoals(goals.filter((goal) => goal._id !== selectedGoalId)); // Remove deleted goal from the list
+        setGoals(goals.filter((goal) => goal._id !== selectedGoalId));
       }
     } catch (error) {
       console.error("Error deleting goal:", error);
       Alert.alert("Error", "Failed to delete goal.");
     } finally {
       setLoading(false);
-      setModalVisible(false); // Close the modal after deleting
+      setModalVisible(false);
     }
   };
 
@@ -115,8 +112,8 @@ const GoalScreen = ({ route }) => {
               <Button
                 title="Delete"
                 onPress={() => {
-                  setSelectedGoalId(item._id); // Set the selected goal ID for deletion
-                  setModalVisible(true); // Open the confirmation modal
+                  setSelectedGoalId(item._id);
+                  setModalVisible(true);
                 }}
                 color="red"
               />
@@ -125,7 +122,6 @@ const GoalScreen = ({ route }) => {
         )}
       />
 
-      {/* Modal for confirming deletion */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -143,10 +139,7 @@ const GoalScreen = ({ route }) => {
               onPress={handleDelete}
               disabled={loading}
             />
-            <Button
-              title="Cancel"
-              onPress={() => setModalVisible(false)} // Close modal without deleting
-            />
+            <Button title="Cancel" onPress={() => setModalVisible(false)} />
           </View>
         </View>
       </Modal>
@@ -158,6 +151,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: "#F0F8FF",
   },
   header: {
     fontSize: 32,

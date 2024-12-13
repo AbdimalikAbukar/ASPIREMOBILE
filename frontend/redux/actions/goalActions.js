@@ -1,4 +1,3 @@
-// actions/goalActions.js
 export const addGoal = (goal) => ({
   type: "ADD_GOAL",
   payload: goal,

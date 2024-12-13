@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
 import { useDispatch } from "react-redux";
 import axios from "axios";
-import * as SecureStore from "expo-secure-store"; // For storing the token securely
+import * as SecureStore from "expo-secure-store";
 import { login } from "../redux/actions/authActions";
 
 const LoginScreen = ({ navigation }) => {
@@ -17,13 +17,12 @@ const LoginScreen = ({ navigation }) => {
         { email, password }
       );
 
-      console.log("Login response data:", response.data); // Log response data
+      console.log("Login response data:", response.data);
 
       if (response.data && response.data.token) {
-        // Store the token securely
         await SecureStore.setItemAsync("authToken", response.data.token);
-        dispatch(login(response.data.user, response.data.token)); // Update Redux state with user and token
-        navigation.replace("Main"); // Navigate to dashboard
+        dispatch(login(response.data.user, response.data.token));
+        navigation.replace("Main");
       } else {
         console.error("Token not found in the response");
         alert("Login failed. Token not received.");
@@ -73,6 +72,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 16,
+    backgroundColor: "#F0F8FF",
   },
   title: {
     fontSize: 24,

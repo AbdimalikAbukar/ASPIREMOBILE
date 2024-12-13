@@ -11,19 +11,18 @@ import {
 } from "react-native";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
-import { useNavigation, useRoute } from "@react-navigation/native"; // For navigation and route params
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const GoalDetailsScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { goalId } = route.params; // Retrieve the goalId from the navigation params
-  const [goal, setGoal] = useState(null); // State to store goal details
-  const [acceptedFriends, setAcceptedFriends] = useState([]); // Friends list
-  const [friendId, setFriendId] = useState(null); // Selected friend's ID
-  const [modalVisible, setModalVisible] = useState(false); // Modal visibility
-  const [loading, setLoading] = useState(false); // Loading state
+  const { goalId } = route.params;
+  const [goal, setGoal] = useState(null);
+  const [acceptedFriends, setAcceptedFriends] = useState([]);
+  const [friendId, setFriendId] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Fetch goal details and accepted friends list
   useEffect(() => {
     const fetchGoalAndFriends = async () => {
       try {
@@ -44,10 +43,9 @@ const GoalDetailsScreen = () => {
             },
           }
         );
-        console.log("Goal Response:", goalResponse.data); // Log goal response
+        console.log("Goal Response:", goalResponse.data);
         setGoal(goalResponse.data);
 
-        // Fetch accepted friends list
         const friendsResponse = await axios.get(
           "http://192.168.2.207:3000/api/friends/",
           {
@@ -56,10 +54,10 @@ const GoalDetailsScreen = () => {
             },
           }
         );
-        console.log("Friends Response:", friendsResponse.data); // Log friends response
+        console.log("Friends Response:", friendsResponse.data);
         setAcceptedFriends(friendsResponse.data.acceptedFriends);
       } catch (error) {
-        console.error("Error fetching goal or friends:", error); // Log any errors
+        console.error("Error fetching goal or friends:", error);
         Alert.alert("Error", "Failed to load goal or friends.");
       } finally {
         setLoading(false);
@@ -67,9 +65,8 @@ const GoalDetailsScreen = () => {
     };
 
     fetchGoalAndFriends();
-  }, [goalId]); // Correct closing of useEffect
+  }, [goalId]);
 
-  // Handle sharing the goal with a friend
   const handleShare = async () => {
     if (!friendId) {
       Alert.alert("Error", "Please select a friend to share the goal with.");
@@ -96,7 +93,7 @@ const GoalDetailsScreen = () => {
 
       if (response.status === 200) {
         Alert.alert("Success", "Goal shared successfully.");
-        setModalVisible(false); // Close modal after sharing
+        setModalVisible(false);
       }
     } catch (error) {
       console.error("Error sharing goal:", error);
@@ -128,7 +125,6 @@ const GoalDetailsScreen = () => {
         disabled={loading}
       />
 
-      {/* Modal for selecting a friend */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -146,8 +142,8 @@ const GoalDetailsScreen = () => {
                 <TouchableOpacity
                   style={styles.friendItem}
                   onPress={() => {
-                    setFriendId(item.friend._id); // Set selected friend's ID
-                    setModalVisible(false); // Close modal after selection
+                    setFriendId(item.friend._id);
+                    setModalVisible(false);
                   }}
                 >
                   <Text style={styles.friendName}>{item.friend.username}</Text>
@@ -173,6 +169,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 16,
+    backgroundColor: "#F0F8FF",
   },
   title: {
     fontSize: 24,
@@ -187,7 +184,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
     width: "80%",
